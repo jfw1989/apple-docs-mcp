@@ -215,12 +215,13 @@ describe('Response Format Validation', () => {
     });
 
     it('should handle network errors with proper format', async () => {
-      // Mock network failure
-      const { httpClient } = await import('../src/utils/http-client.js');
-      (httpClient.getText as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      // Mock network failure — the search route now uses Apple's JSONL search
+      // API (fetch), not httpClient.getText; mock fetchSearchResults instead.
+      const searchApi = await import('../src/tools/apple-search-api.js');
+      jest.spyOn(searchApi, 'fetchSearchResults').mockRejectedValueOnce(new Error('Network error'));
 
       const response = await server.searchAppleDocs('SwiftUI', 'all');
-      
+
       validateResponseFormat(response);
       expect(response.isError).toBe(true);
     });

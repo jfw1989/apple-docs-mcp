@@ -103,9 +103,12 @@ export async function fetchSearchResults(
     let buffer = '';
     const results: SearchResult[] = [];
 
-    outer: while (true) {
+    let finished = false;
+    while (!finished) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       buffer += decoder.decode(value, { stream: true });
 
       const lines = buffer.split('\n');
@@ -113,7 +116,9 @@ export async function fetchSearchResults(
 
       for (const line of lines) {
         const trimmed = line.trim();
-        if (!trimmed) continue;
+        if (!trimmed) {
+          continue;
+        }
         let obj: AppleStreamLine;
         try {
           obj = JSON.parse(trimmed) as AppleStreamLine;
@@ -131,8 +136,11 @@ export async function fetchSearchResults(
           }
         } else if (obj.kind === 'quickSearchFinished' || obj.kind === 'error') {
           clearTimeout(timer);
-          try { await reader.cancel(); } catch { /* stream already ending */ }
-          break outer;
+          try {
+            await reader.cancel();
+          } catch { /* stream already ending */ }
+          finished = true;
+          break;
         }
       }
     }
@@ -154,13 +162,19 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 /** Map a quickSearch documentation hit onto the legacy SearchResult shape. */
 function mapQuickSearchHit(hit: AppleSearchHit, filterType: string): SearchResult | null {
   const meta = hit.metadata;
-  if (!meta || !meta.title) return null;
+  if (!meta?.title) {
+    return null;
+  }
 
   // Only documentation-origin results are relevant here.
-  if (meta.metadataKind && meta.metadataKind !== 'documentation') return null;
+  if (meta.metadataKind && meta.metadataKind !== 'documentation') {
+    return null;
+  }
 
   const url = meta.permalink ?? '';
-  if (!url) return null;
+  if (!url) {
+    return null;
+  }
 
   // Derive the legacy type from the hierarchy/kind so existing filters keep working.
   const type = meta.kind === 'symbol' ? 'documentation' : 'documentation-article';
@@ -171,7 +185,9 @@ function mapQuickSearchHit(hit: AppleSearchHit, filterType: string): SearchResul
     documentation: ['documentation', 'documentation-article'],
     sample: ['sample-code'],
   };
-  if (!(allowed[filterType] ?? allowed.all).includes(type)) return null;
+  if (!(allowed[filterType] ?? allowed.all).includes(type)) {
+    return null;
+  }
 
   return {
     title: meta.title,

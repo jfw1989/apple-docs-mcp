@@ -565,15 +565,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## ⚠️ Disclaimer
 
 This project is not affiliated with or endorsed by Apple Inc. It uses publicly available Apple Developer Documentation APIs for educational and development purposes.
-
----
-
-<div align="center">
-
-**Made with ❤️ for the Apple Developer Community**
-
-Search Apple Developer Documentation | iOS Development | macOS Development | Swift Programming | SwiftUI | UIKit | Xcode | WWDC Videos | Model Context Protocol | MCP Server
-
-[Report Issues](https://github.com/kimsungwhee/apple-docs-mcp/issues) • [Request Features](https://github.com/kimsungwhee/apple-docs-mcp/issues/new) • [Documentation](https://github.com/kimsungwhee/apple-docs-mcp)
-
-</div>

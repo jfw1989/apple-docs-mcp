@@ -13,3 +13,6 @@ coverage/
 .claude/
 .kiro/
 CLAUDE.md
+# local debug helpers (this machine only)
+mcp_probe.py
+min-server.mjs

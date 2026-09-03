@@ -26,6 +26,29 @@ Apple Developer Documentation MCP Server - Access Apple's official developer doc
 
 ## 🚀 Quick Start
 
+### Install from GitHub (this fork)
+
+This fork is distributed directly from GitHub — no npm registry needed. `npx` clones the repo, installs dependencies, builds via the `prepare` script, and runs the server automatically:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "npx",
+      "args": ["-y", "github:jfw1989/apple-docs-mcp"]
+    }
+  }
+}
+```
+
+Or via CLI:
+
+```bash
+claude mcp add apple-docs -- npx -y github:jfw1989/apple-docs-mcp
+```
+
+> Based on [kimsungwhee/apple-docs-mcp](https://github.com/kimsungwhee/apple-docs-mcp) (MIT). This fork replaces the defunct HTML-scraping search route with Apple's internal JSONL search API.
+
 ### Claude Desktop (Recommended)
 
 Add this to your Claude Desktop configuration:

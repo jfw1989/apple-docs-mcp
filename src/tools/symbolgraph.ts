@@ -36,9 +36,9 @@ const CACHE_ROOT = process.env.SG_CACHE_DIR
   ? path.resolve(process.env.SG_CACHE_DIR)
   : path.join(os.tmpdir(), 'symbolgraph-cache');
 
-const SWIFT_BIN = process.env.SG_SWIFT_BIN || 'swift';
+const SWIFT_BIN = process.env.SG_SWIFT_BIN ?? 'swift';
 /** Target triple is platform-parametrised, never hard-coded. */
-const SG_TARGET = process.env.SG_TARGET || detectDefaultTarget();
+const SG_TARGET = process.env.SG_TARGET ?? detectDefaultTarget();
 
 function detectDefaultTarget(): string {
   return process.platform === 'darwin' ? 'arm64-apple-macos26.0' : `${os.arch() === 'arm64' ? 'aarch64' : 'x86_64'}-unknown-linux-gnu`;
@@ -88,7 +88,9 @@ function docText(s: SGSymbol): string {
     | { lines?: Array<{ text?: string } | string> }
     | Array<{ text?: string } | string>
     | undefined;
-  if (!dc) return '';
+  if (!dc) {
+    return '';
+  }
   const lines = Array.isArray(dc) ? dc : dc.lines ?? [];
   const texts = lines.map(l => (typeof l === 'string' ? l : l.text ?? ''));
   return texts.join(' ').trim();
@@ -98,7 +100,9 @@ function docText(s: SGSymbol): string {
 async function ensureGraph(moduleName: string): Promise<string> {
   const dir = cacheDirFor(moduleName);
   const jsonPath = path.join(dir, `${moduleName}.symbols.json`);
-  if (fs.existsSync(jsonPath)) return jsonPath;
+  if (fs.existsSync(jsonPath)) {
+    return jsonPath;
+  }
 
   fs.mkdirSync(dir, { recursive: true });
 
@@ -117,7 +121,9 @@ async function ensureGraph(moduleName: string): Promise<string> {
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (/not found on this platform/.test(msg)) throw e;
+    if (/not found on this platform/.test(msg)) {
+      throw e;
+    }
     if (/ENOENT|spawn/i.test(msg)) {
       throw new Error('No Swift toolchain found on this host. Install Swift (Linux) or Xcode (macOS) to use the symbolgraph layer.');
     }
@@ -208,7 +214,9 @@ export async function lookupSymbol(moduleName: string, symbolName: string): Prom
   const fmt = (s: SGSymbol): string => {
     const doc = docText(s);
     let out = `### ${title(s)}\n- Kind: ${s.kind.displayName}\n- Identifier: \`${preciseId(s)}\``;
-    if (doc) out += `\n- Doc: ${doc.slice(0, 400)}`;
+    if (doc) {
+      out += `\n- Doc: ${doc.slice(0, 400)}`;
+    }
     return out + '\n';
   };
   const header = exact.length ? `# ${moduleName} :: ${symbolName} (exact match)` : `# ${moduleName} :: partial matches for "${symbolName}"`;
@@ -241,7 +249,9 @@ export async function relations(moduleName: string, symbolName: string): Promise
     defaultImplementationOf: 'default implementation of',
   };
   for (const r of outgoing) {
-    if (kindMap[r.kind]) out += `- ${kindMap[r.kind]}: ${nameOf(r.target)}\n`;
+    if (kindMap[r.kind]) {
+      out += `- ${kindMap[r.kind]}: ${nameOf(r.target)}\n`;
+    }
   }
   const members = incoming.filter(r => r.kind === 'memberOf');
   if (members.length) {

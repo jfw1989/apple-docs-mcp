@@ -24,6 +24,12 @@ import {
   findRelatedWWDCVideosSchema,
 } from '../schemas/wwdc.schemas.js';
 import {
+  listFrameworks,
+  lookupSymbol,
+  relations,
+  cacheInfo,
+} from './symbolgraph.js';
+import {
   handleListWWDCVideos,
   handleSearchWWDCContent,
   handleGetWWDCVideo,
@@ -304,6 +310,35 @@ export const toolHandlers: Record<string, ToolHandler> = {
   list_wwdc_years: async (_args, _server) => {
     const result = await handleListWWDCYears();
     return { content: [{ type: 'text', text: result }] };
+  },
+
+  // ── Symbolgraph layer (structural SDK questions; needs a Swift toolchain) ──
+
+  symbolgraph_list_modules: async () => {
+    const result = await listFrameworks();
+    return { content: [{ type: 'text', text: result }] };
+  },
+
+  symbolgraph_lookup_symbol: async (args) => {
+    const { module, symbol } = args as { module: string; symbol: string };
+    if (!module?.trim() || !symbol?.trim()) {
+      throw new Error('Both "module" and "symbol" are required.');
+    }
+    const result = await lookupSymbol(module.trim(), symbol.trim());
+    return { content: [{ type: 'text', text: result }] };
+  },
+
+  symbolgraph_relations: async (args) => {
+    const { module, symbol } = args as { module: string; symbol: string };
+    if (!module?.trim() || !symbol?.trim()) {
+      throw new Error('Both "module" and "symbol" are required.');
+    }
+    const result = await relations(module.trim(), symbol.trim());
+    return { content: [{ type: 'text', text: result }] };
+  },
+
+  symbolgraph_cache_info: async () => {
+    return { content: [{ type: 'text', text: cacheInfo() }] };
   },
 };
 

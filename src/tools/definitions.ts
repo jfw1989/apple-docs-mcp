@@ -6,9 +6,55 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { searchFrameworkSymbolsTool } from './search-framework-symbols.js';
 
 /**
+ * Symbolgraph layer — structural SDK questions (signatures, conformsTo).
+ * Registered below alongside the doc-layer tools; see src/tools/symbolgraph.ts.
+ */
+const symbolgraphToolDefinitions: Tool[] = [
+  {
+    name: 'symbolgraph_list_modules',
+    description: 'List all modules available for symbolgraph extraction on this host from the local Swift toolchain. On macOS: ~300 SDK frameworks (SwiftUI, MapKit, Foundation...). On Linux hosts: Swift standard library modules (Swift, Foundation, Glibc). Use this to check what the SDK layer can answer on the current machine before querying symbols.',
+    inputSchema: { type: 'object', properties: {}, required: [] },
+    annotations: { title: 'Symbolgraph: List Modules', readOnlyHint: true },
+  },
+  {
+    name: 'symbolgraph_lookup_symbol',
+    description: 'Look up a symbol in a Swift module via the local SDK symbolgraph: exact kind (Structure/Class/Protocol...), precise identifier, and doc text. Answers "what is the exact signature/kind of X in the SDK I build against". Requires a Swift toolchain on the host. Use symbolgraph_list_modules first to see available modules.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        module: { type: 'string', description: 'Module name, e.g. "Swift", "Foundation", "SwiftUI" (macOS only)' },
+        symbol: { type: 'string', description: 'Symbol name, e.g. "Duration" or "List"' },
+      },
+      required: ['module', 'symbol'],
+    },
+    annotations: { title: 'Symbolgraph: Lookup Symbol', readOnlyHint: true },
+  },
+  {
+    name: 'symbolgraph_relations',
+    description: 'Get the relationship network of a symbol from the local SDK symbolgraph: conformsTo protocols, memberOf parent, inheritsFrom, plus member lists and conforming types. Answers "which protocols does X conform to" / "what members does X have". Requires a Swift toolchain on the host.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        module: { type: 'string', description: 'Module name, e.g. "Swift", "Foundation", "SwiftUI" (macOS only)' },
+        symbol: { type: 'string', description: 'Symbol name, e.g. "Duration" or "List"' },
+      },
+      required: ['module', 'symbol'],
+    },
+    annotations: { title: 'Symbolgraph: Relations', readOnlyHint: true },
+  },
+  {
+    name: 'symbolgraph_cache_info',
+    description: 'Show symbolgraph cache directory, configured target triple, and Swift binary path. Useful for debugging extraction issues.',
+    inputSchema: { type: 'object', properties: {}, required: [] },
+    annotations: { title: 'Symbolgraph: Cache Info', readOnlyHint: true },
+  },
+];
+
+/**
  * All available tools
  */
 export const toolDefinitions: Tool[] = [
+  ...symbolgraphToolDefinitions,
   {
     name: 'search_apple_docs',
     description: 'Search Apple Developer Documentation for APIs, frameworks, guides, and samples. Best for finding specific APIs, classes, or methods. For browsing sample code projects, use get_sample_code. For WWDC videos, use the dedicated WWDC tools (list_wwdc_videos, search_wwdc_content).',

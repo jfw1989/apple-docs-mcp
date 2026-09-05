@@ -59,7 +59,7 @@ Add this to your Claude Desktop configuration:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "github:jfw1989/apple-docs-mcp"]
     }
   }
 }
@@ -67,7 +67,7 @@ Add this to your Claude Desktop configuration:
 
 > **Note**: If you encounter issues with an old version being used, add `@latest` to force the latest version:
 > ```json
-> "args": ["-y", "@kimsungwhee/apple-docs-mcp@latest"]
+> "args": ["-y", "github:jfw1989/apple-docs-mcp@latest"]
 > ```
 
 Restart Claude Desktop and start asking about Apple APIs!
@@ -78,7 +78,7 @@ Restart Claude Desktop and start asking about Apple APIs!
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
+claude mcp add apple-docs -- npx -y github:jfw1989/apple-docs-mcp@latest
 ```
 
 [📖 Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -97,7 +97,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "github:jfw1989/apple-docs-mcp"]
     }
   }
 }
@@ -119,7 +119,7 @@ Add to your VS Code MCP config:
       "apple-docs": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "github:jfw1989/apple-docs-mcp"]
       }
     }
   }
@@ -140,7 +140,7 @@ Add to your Windsurf MCP config:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "github:jfw1989/apple-docs-mcp"]
     }
   }
 }
@@ -161,7 +161,7 @@ Add to your Zed `settings.json`:
     "Apple Docs": {
       "command": {
         "path": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "github:jfw1989/apple-docs-mcp"]
       },
       "settings": {}
     }
@@ -187,7 +187,7 @@ Add to your Zed `settings.json`:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["-y", "github:jfw1989/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -207,7 +207,7 @@ Add to your Zed `settings.json`:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "github:jfw1989/apple-docs-mcp"]
     }
   }
 }
@@ -227,7 +227,7 @@ For Windows systems, use:
   "mcpServers": {
     "apple-docs": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["/c", "npx", "-y", "github:jfw1989/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -243,20 +243,20 @@ For Windows systems, use:
 **Global Installation**:
 ```bash
 # Using pnpm (recommended)
-pnpm add -g @kimsungwhee/apple-docs-mcp
+pnpm add -g github:jfw1989/apple-docs-mcp
 
 # Using npm
-npm install -g @kimsungwhee/apple-docs-mcp
+npm install -g github:jfw1989/apple-docs-mcp
 ```
 
 **Direct Usage**:
 ```bash
-npx @kimsungwhee/apple-docs-mcp --help
+npx github:jfw1989/apple-docs-mcp --help
 ```
 
 **Development Setup**:
 ```bash
-git clone https://github.com/kimsungwhee/apple-docs-mcp.git
+git clone https://github.com/jfw1989/apple-docs-mcp.git
 cd apple-docs-mcp
 
 # Using pnpm (recommended)

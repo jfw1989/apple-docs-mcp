@@ -1,9 +1,9 @@
 # Apple Docs MCP - Apple Developer Documentation Model Context Protocol Server
 
-[![npm version](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp.svg)](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp)
+[![CI](https://github.com/jfw1989/apple-docs-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/jfw1989/apple-docs-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Apple Developer Documentation MCP Server - Access Apple's official developer docs, frameworks, APIs, SwiftUI, UIKit, and WWDC videos through Model Context Protocol. Search iOS, macOS, watchOS, tvOS, and visionOS documentation with AI-powered natural language queries. Get instant access to Swift/Objective-C code examples, API references, and technical guides directly in Claude, Cursor, or any MCP-compatible AI assistant.
+Apple Developer Documentation MCP Server - Access Apple's official developer docs, frameworks, APIs, SwiftUI, UIKit, and WWDC videos through Model Context Protocol. Search iOS, macOS, watchOS, tvOS, and visionOS documentation with AI-powered natural language queries. Get instant access to Swift/Objective-C code examples, API references, and technical guides directly in Claude, Cursor, or any MCP-compatible AI assistant. On hosts with a local Swift toolchain, an additional **symbolgraph layer** answers structural SDK questions — exact signatures, conformances, and member lists — offline.
 
 ## ✨ Features
 
@@ -21,6 +21,7 @@ Apple Developer Documentation MCP Server - Access Apple's official developer doc
 - 🔄 **Smart UserAgent Pool**: Intelligent UserAgent rotation system with automatic failure recovery and performance monitoring
 - 🌐 **Multi-Platform**: Complete iOS, iPadOS, macOS, watchOS, tvOS, and visionOS documentation support
 - 🏷️ **Beta & Status Tracking**: iOS 26 beta APIs, deprecated UIKit methods, new SwiftUI features tracking
+- 🧩 **SDK Symbolgraph Layer**: Structural SDK questions — exact signatures, kind info, conformances, member lists — answered from the local Swift toolchain (macOS: ~300 SDK frameworks; Linux: Swift stdlib modules; no network needed)
 
 ## 🚀 Quick Start
 
@@ -198,7 +199,7 @@ Add to your Zed `settings.json`:
 </details>
 
 <details>
-<summary><strong> Amazon A Developer CLI</strong></summary>
+<summary><strong>🟠 Amazon Q Developer CLI</strong></summary>
 
 **Via Config File**: Add to `~/.aws/amazonq/mcp.json`:
 
@@ -213,7 +214,7 @@ Add to your Zed `settings.json`:
 }
 ```
 
-[📖 Amazon A Developer CLI MCP docs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/qdev-mcp.html)
+[📖 Amazon Q Developer CLI MCP docs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/qdev-mcp.html)
 
 </details>
 
@@ -308,6 +309,17 @@ npm install && npm run build
 "Discover alternatives to Core Data NSManagedObject"
 ```
 
+### 🧩 SDK Symbolgraph (local Swift toolchain)
+
+Structural questions answered from the local SDK symbolgraph — offline, exact, current toolchain state:
+
+```
+"Which protocols does Swift.Collection conform to?"
+"What is the exact kind and signature of Duration in the Swift module?"
+"List all members of SwiftUI.List"
+"Which modules are available for symbolgraph extraction on this host?"
+```
+
 ### 📋 Technology & Platform Analysis
 ```
 "List all Beta frameworks in iOS 26"
@@ -383,9 +395,13 @@ npm install && npm run build
 
 ## 🛠️ Available Tools
 
+**22 tools** in two layers. The **doc layer** (18 tools) fetches live data from Apple Developer. The **symbolgraph layer** (4 tools) answers structural SDK questions from the local Swift toolchain — available wherever a Swift toolchain is installed, no network needed.
+
+### Doc Layer (18)
+
 | Tool | Description | Key Features |
 |------|-------------|--------------|
-| `search_apple_docs` | Search Apple Developer Documentation | Official search API, find specific APIs, classes, methods |
+| `search_apple_docs` | Search Apple Developer Documentation | Apple's internal JSONL search API, find specific APIs, classes, methods |
 | `get_apple_doc_content` | Get detailed documentation content | JSON API access, optional enhanced analysis (related/similar APIs, platform compatibility) |
 | `list_technologies` | Browse all Apple technologies | Category filtering, language support, beta status |
 | `search_framework_symbols` | Search symbols in specific framework | Classes, structs, protocols, wildcard patterns, type filtering |
@@ -396,10 +412,22 @@ npm install && npm run build
 | `get_documentation_updates` | Track Apple documentation updates | WWDC announcements, technology updates, release notes |
 | `get_technology_overviews` | Get technology overviews and guides | Comprehensive guides, hierarchical navigation, platform filtering |
 | `get_sample_code` | Browse Apple sample code projects | Framework filtering (with limitations), keyword search, beta status |
-| `search_wwdc_videos` | Search WWDC video sessions | Keyword search, topic/year filtering, session metadata |
-| `get_wwdc_video_details` | Get WWDC video details with transcript | Full transcripts, code examples, resources, platform info |
-| `list_wwdc_topics` | List all available WWDC topics | 19 topic categories from Swift to Spatial Computing |
+| `list_wwdc_videos` | Browse WWDC video sessions | Year/topic filtering, session metadata |
+| `search_wwdc_content` | Full-text search across WWDC videos | Transcripts, code examples, resources |
+| `get_wwdc_video` | Get complete WWDC session content | Full transcript, code examples, resources, platform info |
+| `get_wwdc_code_examples` | Browse code examples from WWDC sessions | Per-session Swift/SwiftUI samples |
+| `browse_wwdc_topics` | List all WWDC topic categories | 19 topic categories with IDs |
+| `find_related_wwdc_videos` | Discover WWDC sessions related to a video | Cross-session recommendations |
 | `list_wwdc_years` | List all available WWDC years | Conference years with video counts |
+
+### Symbolgraph Layer (4)
+
+| Tool | Description | Key Features |
+|------|-------------|--------------|
+| `symbolgraph_list_modules` | List modules available for symbolgraph extraction on this host | macOS: ~300 SDK frameworks; Linux: Swift stdlib modules |
+| `symbolgraph_lookup_symbol` | Look up a symbol in a Swift module via the local SDK symbolgraph | Exact kind (Structure/Class/Protocol…), precise identifier, doc text |
+| `symbolgraph_relations` | Get the relationship network of a symbol | conformsTo, memberOf, inheritsFrom, member lists, conforming types |
+| `symbolgraph_cache_info` | Show symbolgraph cache directory and configuration | Target triple, Swift binary path — useful for debugging extraction |
 
 ## 🏗️ Technical Architecture for Apple Developer Documentation Access
 
@@ -408,8 +436,16 @@ apple-docs-mcp/
 ├── 🔧 src/
 │   ├── index.ts                      # MCP server entry point with all tools
 │   ├── tools/                        # MCP tool implementations
-│   │   ├── search-parser.ts          # HTML search result parsing
+│   │   ├── apple-search-api.ts       # Apple's internal JSONL search API client
+│   │   ├── search-parser.ts          # Search result formatting
+│   │   ├── search-result-parser.ts   # Shared search result types
 │   │   ├── doc-fetcher.ts            # JSON API documentation fetching
+│   │   ├── doc-formatter.ts          # Documentation content formatting
+│   │   ├── definitions.ts            # All 22 tool definitions (schemas, annotations)
+│   │   ├── handlers.ts               # Tool-call dispatch
+│   │   ├── tools-guide.ts            # Tool usage guidance
+│   │   ├── symbolgraph.ts            # SDK symbolgraph layer (local Swift toolchain)
+│   │   ├── search-framework-symbols.ts # Framework symbol search
 │   │   ├── list-technologies.ts      # Technology catalog handling
 │   │   ├── get-documentation-updates.ts # Documentation updates tracking
 │   │   ├── get-technology-overviews.ts # Technology overviews and guides
@@ -426,14 +462,18 @@ apple-docs-mcp/
 │   │       └── video-list-extractor.ts # Video list parsing
 │   └── utils/                        # Utility functions and helpers
 │       ├── cache.ts                  # Memory cache with TTL support
+│       ├── cache-warmer.ts           # Cache warm-up + periodic refresh
+│       ├── preloader.ts              # Popular-framework preloading
 │       ├── constants.ts              # Application constants and URLs
 │       ├── error-handler.ts          # Error handling and validation
 │       ├── http-client.ts            # HTTP client with performance tracking
 │       ├── user-agent-pool.ts        # Smart UserAgent rotation system
 │       ├── http-headers-generator.ts # Dynamic browser headers generation
+│       ├── rate-limiter.ts           # Request rate limiting
+│       ├── wwdc-data-source.ts       # Bundled WWDC data access
 │       └── url-converter.ts          # URL conversion utilities
-├── 📦 dist/                          # Compiled JavaScript
-├── 📄 package.json                   # Package configuration
+├── 📦 dist/                          # Compiled JavaScript (incl. bundled data/)
+├── 📄 package.json                   # Package configuration (prepare = build)
 └── 📖 README.md                      # This file
 ```
 
@@ -458,9 +498,24 @@ apple-docs-mcp/
 | Technologies List | 2 hours | 50 entries | Rarely changes, large content |
 | Documentation Updates | 30 minutes | 100 entries | Regular updates, WWDC announcements |
 
+### 🧩 Symbolgraph Layer Configuration
+
+The symbolgraph layer uses the local Swift toolchain via `swift-symbolgraph-extract`. Extraction results are cached on disk (persistent across restarts; SwiftUI ~456 MB JSON, so extraction is a one-time cost per module).
+
+#### Environment Variables
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `SG_SWIFT_BIN` | Path to the `swift` binary | `swift` (from `PATH`) | `/opt/swift/usr/bin/swift` |
+| `SG_TARGET` | Target triple for extraction | Auto-detected (`arm64-apple-macos26.0` on macOS, `x86_64`/`aarch64-unknown-linux-gnu` on Linux) | `arm64-apple-macos26.0` |
+| `SG_CACHE_DIR` | Symbolgraph cache directory | `<os.tmpdir>/symbolgraph-cache` | `/var/cache/symbolgraph` |
+| `SG_PREWARM` | Comma-separated modules to extract at startup | *(none)* | `Swift,Foundation` |
+
+**Two-layer split** (by design): Apple-exclusive frameworks (SwiftUI, MapKit, …) extract only on **macOS** (via the local SDK, ~300 frameworks). On **Linux**, the layer covers Swift standard library modules (Swift: 14,252 symbols, Foundation: 5,450 — measured with Swift 6.2.1). Hosts without a Swift toolchain get a clear error, never a hang — the 18 doc-layer tools keep working.
+
 ## 📦 WWDC Data
 
-All WWDC video data (2014-2025) is **bundled directly in the npm package**, providing:
+All WWDC video data (2014-2025) is **bundled directly in the package** (installed from GitHub, `data/` ships inside the built `dist/`), providing:
 
 - ✅ **Zero network latency** - No API calls needed for WWDC content
 - ✅ **100% offline access** - Works without internet connection
@@ -468,10 +523,10 @@ All WWDC video data (2014-2025) is **bundled directly in the npm package**, prov
 - ✅ **Instant responses** - All data is locally available
 
 The package includes:
-- 📹 **1,260+ WWDC session videos** with full transcripts
-- 🏷️ **20 topic categories** for organized browsing
-- 📅 **13 years of content** (2012-2025)
-- 💾 **35MB of optimized JSON data**
+- 📹 **1,266 WWDC session videos** with full transcripts
+- 🏷️ **19 topic categories** for organized browsing
+- 📅 **12 years of content** (2014-2025)
+- 💾 **36MB of JSON data**
 
 > **Note**: Keep your package updated to get the latest WWDC content additions.
 
@@ -545,7 +600,7 @@ pnpm run clean  # or: npm run clean
 node dist/index.js
 
 # Test with sample queries
-npx @kimsungwhee/apple-docs-mcp --test
+npx github:jfw1989/apple-docs-mcp --test
 ```
 
 ## 🤝 Contributing
